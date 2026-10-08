@@ -56,7 +56,7 @@ LEADERBOARD_SIZE = 10
 # --- Eating / growth / speed / zoom (feat/eating-growth) ---
 # radius = RADIUS_PER_SQRT_MASS * sqrt(mass); start mass 20 -> radius ~10
 RADIUS_PER_SQRT_MASS = 2.236
-FOOD_RADIUS = 7                 # food is drawn with this fixed radius; eating it gives +food.mass
+FOOD_RADIUS = 3                 # food is drawn with this fixed radius; eating it gives +food.mass
 EAT_MASS_RATIO = 1.25           # eater needs >= ratio * prey mass
 EAT_OVERLAP = 0.4               # prey centre must be within R - r * EAT_OVERLAP
 SPEED_MASS_EXPONENT = 0.3       # speed = PLAYER_SPEED * (start_mass / mass) ** exponent
