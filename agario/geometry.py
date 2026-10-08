@@ -1,6 +1,8 @@
 """Pure math helpers. No pygame import."""
 import math
 
+from . import config
+
 
 def distance(a, b):
     """Euclidean distance between points a and b."""
@@ -21,4 +23,4 @@ def clamp(value, lo, hi):
 
 def mass_to_radius(mass):
     """The single place that defines how mass maps to radius."""
-    return mass / 2
+    return config.RADIUS_PER_SQRT_MASS * math.sqrt(max(mass, 0))

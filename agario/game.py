@@ -26,7 +26,7 @@ def run(max_frames=None):
     renderer = Renderer(surface)
     camera = Camera()
     world, player = build_world()
-    camera.update(player)
+    camera.update(player, snap=True)
 
     frames = 0
     running = True

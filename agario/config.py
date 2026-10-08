@@ -12,9 +12,8 @@ FPS = 60
 
 # Gameplay
 FOOD_COUNT = 2000
-FOOD_MASS = 7
+FOOD_MASS = 1
 FOOD_MARGIN = 20
-FOOD_EAT_GAIN = 0.5
 PLAYER_START_MASS = 20
 PLAYER_SPEED = 4
 PLAYER_NAME = "GeoVas"
@@ -52,3 +51,18 @@ BIG_FONT_SIZE = 24
 
 # HUD
 LEADERBOARD_SIZE = 10
+
+
+# --- Eating / growth / speed / zoom (feat/eating-growth) ---
+# radius = RADIUS_PER_SQRT_MASS * sqrt(mass); start mass 20 -> radius ~10
+RADIUS_PER_SQRT_MASS = 2.236
+FOOD_RADIUS = 7                 # food is drawn with this fixed radius; eating it gives +food.mass
+EAT_MASS_RATIO = 1.25           # eater needs >= ratio * prey mass
+EAT_OVERLAP = 0.4               # prey centre must be within R - r * EAT_OVERLAP
+SPEED_MASS_EXPONENT = 0.3       # speed = PLAYER_SPEED * (start_mass / mass) ** exponent
+MIN_SPEED = 0.8
+FOOD_RESPAWN_PER_TICK = 5       # food added per tick while below FOOD_COUNT
+ZOOM_VIEW_K = 20                # target zoom = ZOOM_VIEW_K / radius(total mass)
+ZOOM_MIN = 0.15
+ZOOM_MAX = 2.0
+ZOOM_SMOOTHING = 0.1            # fraction of the gap closed per update
