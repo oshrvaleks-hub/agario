@@ -52,3 +52,19 @@ BIG_FONT_SIZE = 24
 
 # HUD
 LEADERBOARD_SIZE = 10
+
+# Split, own-cell merging and mass ejection (speeds are world units per tick).
+MAX_CELLS = 16
+SPLIT_MIN_MASS = 35
+SPLIT_SPEED = 20.0
+IMPULSE_FRICTION = 0.90  # Below 1% of initial speed after 44 ticks (~0.73 s).
+MERGE_BASE_TICKS = 10 * FPS
+MERGE_TICKS_PER_MASS = 0.05 * FPS  # Delay uses the mass of each new half.
+MERGE_OVERLAP_RATIO = 0.5  # Merge within half the sum of the two radii.
+OWN_CELL_RELAX_PASSES = 16
+EJECT_MIN_MASS = 32
+EJECT_COST = 18
+EJECT_MASS = 14  # Four mass units are lost on each shot.
+EJECT_SPEED = 16.0
+EJECT_FRICTION = 0.90
+EJECT_IMMUNITY_TICKS = 8  # Only the exact source cell is temporarily excluded.

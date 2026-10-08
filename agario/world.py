@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from . import config, physics
-from .entities import Food, Player
+from .entities import EjectedMass, Food, Player
+from .mechanics.eject import eject_mass, update_ejected
+from .mechanics.split import apply_impulse, resolve_own_cells, split_player
 
 
 @dataclass
@@ -22,7 +24,7 @@ class World:
         self.food: List[Food] = []
         self.players: List[Player] = []
         self.viruses: list = []   # reserved for the virus mechanic
-        self.ejected: list = []   # reserved for the eject-mass mechanic
+        self.ejected: List[EjectedMass] = []
 
     def spawn_food(self, count):
         self.food.extend(Food.random(self.width, self.height) for _ in range(count))
@@ -31,9 +33,19 @@ class World:
         for player, control in controls.items():
             if not player.alive:
                 continue
-            # TODO: split — handle control.split (divide cells)
-            # TODO: eject — handle control.eject (spawn into self.ejected)
+            if control.split:
+                split_player(player, control.target)
+            if control.eject:
+                eject_mass(player, control.target, self)
             for cell in player.cells:
                 physics.move_cell(cell, control.target, control.speed_factor,
                                   self.width, self.height)
                 physics.eat_food(cell, self.food)
+        for player in dict.fromkeys([*self.players, *controls]):
+            if player.alive:
+                for cell in player.cells:
+                    apply_impulse(cell, self.width, self.height)
+                resolve_own_cells(player)
+                for cell in player.cells:
+                    physics.keep_in_bounds(cell, self.width, self.height)
+        update_ejected(self)

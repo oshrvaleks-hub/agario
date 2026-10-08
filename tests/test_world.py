@@ -40,7 +40,7 @@ def test_map_bounds():
     assert p.cells[0].x <= 1000 and p.cells[0].y <= 1000
 
 
-def test_split_eject_ignored():
+def test_split_eject_below_minimum_mass():
     w, p = setup()
     w.update({p: Control(target=(500, 500), split=True, eject=True)})
     assert len(p.cells) == 1 and w.ejected == []
