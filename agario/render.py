@@ -3,6 +3,7 @@ import pygame
 
 from . import config
 from .geometry import mass_to_radius
+from .leaderboard import rank_players
 
 
 class Renderer:
@@ -68,10 +69,14 @@ class Renderer:
         self.surface.blit(pygame.transform.scale(self.scoreboard_surface, (w, h)), (8, sh - 30))
         self.draw_text(score, (10, sh - 30))
 
-        self.surface.blit(self.leaderboard_surface, (sw - 160, 15))
+        rows = rank_players(world.players, local_player, config.LEADERBOARD_SIZE)
+        panel_height = 28 + 25 * len(rows)
+        panel = pygame.transform.scale(self.leaderboard_surface, (155, panel_height))
+        self.surface.blit(panel, (sw - 160, 15))
         self.surface.blit(self.big_font.render("Leaderboard", 0, config.HUD_TEXT_COLOR),
                           (sw - 157, 20))
-        # Stub: ranks the players currently in the world by mass.
-        ranked = sorted(world.players, key=lambda p: p.total_mass, reverse=True)
-        for i, p in enumerate(ranked[:config.LEADERBOARD_SIZE], start=1):
-            self.draw_text("{}. {}".format(i, p.name), (sw - 157, 20 + 25 * i))
+        for line, (rank, player) in enumerate(rows, start=1):
+            color = (config.LEADERBOARD_LOCAL_COLOR if player is local_player
+                     else config.HUD_TEXT_COLOR)
+            self.draw_text("{}. {}".format(rank, player.name),
+                           (sw - 157, 20 + 25 * line), color)

@@ -2,6 +2,7 @@
 import pygame
 
 from . import config, physics
+from .ai import BotBrain
 from .camera import Camera
 from .entities import Player
 from .geometry import distance
@@ -14,6 +15,7 @@ def build_world():
     world.spawn_food(config.FOOD_COUNT)
     player = Player.spawn(config.PLAYER_NAME)
     world.players.append(player)
+    world.spawn_bots()
     return world, player
 
 
@@ -27,6 +29,7 @@ def run(max_frames=None):
     camera = Camera()
     world, player = build_world()
     camera.update(player)
+    brains = {bot: BotBrain() for bot in world.players if bot.is_bot}
 
     frames = 0
     running = True
@@ -51,7 +54,10 @@ def run(max_frames=None):
                           speed_factor=physics.speed_factor_for_distance(distance(mouse, centre)),
                           split=split, eject=eject)
 
-        world.update({player: control})
+        controls = {bot: brain.decide(bot, world) for bot, brain in brains.items()
+                    if bot.alive and bot.cells}
+        controls[player] = control
+        world.update(controls)
         camera.update(player)
         renderer.draw(world, camera, player)
         pygame.display.flip()

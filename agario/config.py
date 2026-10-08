@@ -52,3 +52,14 @@ BIG_FONT_SIZE = 24
 
 # HUD
 LEADERBOARD_SIZE = 10
+
+# Bots and live leaderboard (feat/bots)
+BOT_COUNT = 10
+BOT_NAMES = ("Blobby", "Nom", "Cookie", "Pebble", "Mochi", "Bean",
+             "Bubbles", "Pudding", "Dot", "Jelly")
+BOT_EAT_RATIO = 1.25
+BOT_VIEW_RADIUS = 500
+BOT_DECISION_TICKS = 8
+BOT_WANDER_TICKS = 120
+BOT_RESPAWN_TICKS = 180
+LEADERBOARD_LOCAL_COLOR = (255, 225, 90)
