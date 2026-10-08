@@ -4,10 +4,11 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from . import config, physics
-from .entities import EjectedMass, Food, Player
+from .entities import EjectedMass, Food, Player, Virus
 from .mechanics import eating
 from .mechanics.eject import eject_mass, update_ejected
 from .mechanics.split import apply_impulse, resolve_own_cells, split_player
+from .mechanics.virus import maintain_viruses, update_viruses
 
 
 @dataclass
@@ -21,19 +22,23 @@ class Control:
 
 class World:
     def __init__(self, width=config.MAP_WIDTH, height=config.MAP_HEIGHT,
-                 food_target=config.FOOD_COUNT):
+                 food_target=config.FOOD_COUNT, virus_target=config.VIRUS_COUNT):
         self.width = width
         self.height = height
         self.food_target = food_target
         self.food: List[Food] = []
         self.players: List[Player] = []
-        self.viruses: list = []   # reserved for the virus mechanic
+        self.viruses: List[Virus] = []
+        self.virus_target = virus_target
         self.ejected: List[EjectedMass] = []
         self._bot_respawn_timers = {}
         self._bot_rng = random.Random()
 
     def spawn_food(self, count):
         self.food.extend(Food.random(self.width, self.height) for _ in range(count))
+
+    def spawn_viruses(self):
+        maintain_viruses(self)
 
     def spawn_bots(self, n=config.BOT_COUNT, names=None, rng=None):
         from .ai import spawn_bots
@@ -61,10 +66,12 @@ class World:
                 for cell in player.cells:
                     physics.keep_in_bounds(cell, self.width, self.height)
         update_ejected(self)
+        update_viruses(self)
         eating.resolve_player_collisions(self)
         self._respawn_food()
         from .ai import respawn_bots
         respawn_bots(self, self._bot_respawn_timers, self._bot_rng)
+        self.spawn_viruses()
 
     def _respawn_food(self):
         missing = self.food_target - len(self.food)

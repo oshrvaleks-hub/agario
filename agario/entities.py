@@ -53,6 +53,20 @@ class EjectedMass:
         return mass_to_radius(self.mass)
 
 
+@dataclass
+class Virus:
+    x: float
+    y: float
+    mass: float
+    vx: float = 0.0
+    vy: float = 0.0
+    fed: int = 0
+
+    @property
+    def radius(self):
+        return mass_to_radius(self.mass)
+
+
 # eq=False: players are used as dict keys (controls) so identity hashing is needed
 @dataclass(eq=False)
 class Player:

@@ -93,3 +93,16 @@ BOT_DECISION_TICKS = 8
 BOT_WANDER_TICKS = 120
 BOT_RESPAWN_TICKS = 180
 LEADERBOARD_LOCAL_COLOR = (255, 225, 90)
+
+# --- Viruses (feat/viruses) ---
+VIRUS_COUNT = 18  # Minimum population; feeding may raise it above this target.
+VIRUS_MASS = 100
+VIRUS_SPAWN_MARGIN = 80  # Extra clearance beyond both circle radii.
+VIRUS_SPAWN_ATTEMPTS = 100  # Per missing virus; retry next tick if crowded.
+VIRUS_FEED_SHOTS = 7
+VIRUS_LAUNCH_SPEED = 18.0
+VIRUS_FRAGMENT_MASS = 20  # Aim for this mass, subject to MAX_CELLS.
+VIRUS_BURST_SPEED = 20.0
+VIRUS_COLOR = (50, 190, 45)
+VIRUS_OUTLINE_COLOR = (25, 120, 20)
+VIRUS_SPIKES = 20

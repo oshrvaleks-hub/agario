@@ -16,6 +16,7 @@ def build_world():
     player = Player.spawn(config.PLAYER_NAME)
     world.players.append(player)
     world.spawn_bots()
+    world.spawn_viruses()
     return world, player
 
 
