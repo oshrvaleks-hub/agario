@@ -160,6 +160,11 @@ class Player(Drawable):
 
     FONT_COLOR = (50, 50, 50)
     
+    # Mouse distance (px) from the blob below which the blob stays still
+    STOP_RADIUS = 10
+    # Mouse distance (px) at which the blob reaches its full speed
+    FULL_SPEED_DISTANCE = SCREEN_WIDTH/4
+
     def __init__(self, surface, camera, name = ""):
         super().__init__(surface, camera)
         self.x = random.randint(100,400)
@@ -191,6 +196,12 @@ class Player(Drawable):
         """
         
         dX, dY = pygame.mouse.get_pos()
+        # Speed grows linearly with the mouse distance from the center of the screen,
+        # capped at self.speed. Stay still when the mouse is very close to the blob.
+        distance = getDistance((dX, dY), (float(SCREEN_WIDTH)/2, float(SCREEN_HEIGHT)/2))
+        if distance <= Player.STOP_RADIUS:
+            return
+        speed = self.speed*min(1, distance/Player.FULL_SPEED_DISTANCE)
         # Find the angle from the center of the screen to the mouse in radians [-Pi, Pi]
         rotation = math.atan2(dY - float(SCREEN_HEIGHT)/2, dX - float(SCREEN_WIDTH)/2)
         # Convert radians to degrees [-180, 180]
@@ -199,12 +210,12 @@ class Player(Drawable):
         # First project the point from unit circle to X-axis
         # Then map resulting interval to [-1, 1]
         normalized = (90 - math.fabs(rotation))/90
-        vx = self.speed*normalized
+        vx = speed*normalized
         vy = 0
         if rotation < 0:
-            vy = -self.speed + math.fabs(vx)
+            vy = -speed + math.fabs(vx)
         else:
-            vy = self.speed - math.fabs(vx)
+            vy = speed - math.fabs(vx)
         tmpX = self.x + vx
         tmpY = self.y + vy
         self.x = tmpX
