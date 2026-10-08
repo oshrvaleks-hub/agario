@@ -65,11 +65,7 @@ class BotBrain:
         if prey:
             cell = min(prey, key=lambda item: item[0])[1]
             return Control((cell.x, cell.y), 1.0)
-        nearest, best = None, radius2 + 1
-        for food in world.food:
-            d2 = (food.x - x) ** 2 + (food.y - y) ** 2
-            if d2 <= radius2 and d2 < best:
-                nearest, best = food, d2
+        nearest = world.food.grid.nearest(x, y, config.BOT_VIEW_RADIUS)
         if nearest is not None:
             return Control((nearest.x, nearest.y), 1.0)
         if self._wander_remaining <= 0 or self._wander_target is None:

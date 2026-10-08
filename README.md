@@ -46,5 +46,7 @@ units overall. Positions stay inside the map.
 - `agario/world.py` — `World` state, `Control` input, `World.update(controls)`
 - `agario/physics.py` — movement, eating, map bounds
 - `agario/camera.py` — zoom and world/screen coordinate transforms
+- `agario/spatial.py` — uniform-grid index for food (area queries, nearest lookup)
+- `tools/bench.py` — benchmark: logic ms/tick and render ms/frame in dummy video mode
 - `agario/render.py` — all pygame drawing (grid, food, players, HUD)
 - `agario/game.py` — pygame init, event handling and the main loop

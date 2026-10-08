@@ -8,6 +8,7 @@ from .entities import EjectedMass, Food, Player
 from .mechanics import eating
 from .mechanics.eject import eject_mass, update_ejected
 from .mechanics.split import apply_impulse, resolve_own_cells, split_player
+from .spatial import SpatialList
 
 
 @dataclass
@@ -25,12 +26,21 @@ class World:
         self.width = width
         self.height = height
         self.food_target = food_target
-        self.food: List[Food] = []
+        self._food = SpatialList()
         self.players: List[Player] = []
         self.viruses: list = []   # reserved for the virus mechanic
         self.ejected: List[EjectedMass] = []
         self._bot_respawn_timers = {}
         self._bot_rng = random.Random()
+
+    @property
+    def food(self) -> List[Food]:
+        """Food list; indexed by a spatial grid at `food.grid`."""
+        return self._food
+
+    @food.setter
+    def food(self, items):
+        self._food = items if isinstance(items, SpatialList) else SpatialList(items)
 
     def spawn_food(self, count):
         self.food.extend(Food.random(self.width, self.height) for _ in range(count))

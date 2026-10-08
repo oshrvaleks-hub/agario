@@ -59,10 +59,19 @@ def eat_food(cell, food_list):
 
     Mutates `food_list` and `cell.mass`; returns the number eaten.
     """
+    radius = cell.radius
+    grid = getattr(food_list, "grid", None)
+    if grid is not None:
+        # Indexed list (World.food): only look at food near the cell.
+        eaten = grid.query_circle(cell.x, cell.y, radius)
+        if eaten:
+            food_list.remove_many(eaten)
+            cell.mass += sum(f.mass for f in eaten)
+        return len(eaten)
     remaining = []
     eaten = 0
     for f in food_list:
-        if distance((f.x, f.y), (cell.x, cell.y)) <= cell.radius:
+        if distance((f.x, f.y), (cell.x, cell.y)) <= radius:
             cell.mass += f.mass
             eaten += 1
         else:

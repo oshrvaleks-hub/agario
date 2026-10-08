@@ -93,3 +93,6 @@ BOT_DECISION_TICKS = 8
 BOT_WANDER_TICKS = 120
 BOT_RESPAWN_TICKS = 180
 LEADERBOARD_LOCAL_COLOR = (255, 225, 90)
+
+# --- Performance: spatial grid (perf/spatial-grid) ---
+SPATIAL_CELL_SIZE = 100   # world units per bucket side
