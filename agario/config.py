@@ -12,9 +12,8 @@ FPS = 60
 
 # Gameplay
 FOOD_COUNT = 2000
-FOOD_MASS = 7
+FOOD_MASS = 1
 FOOD_MARGIN = 20
-FOOD_EAT_GAIN = 0.5
 PLAYER_START_MASS = 20
 PLAYER_SPEED = 4
 PLAYER_NAME = "GeoVas"
@@ -53,11 +52,42 @@ BIG_FONT_SIZE = 24
 # HUD
 LEADERBOARD_SIZE = 10
 
-# Bots and live leaderboard (feat/bots)
+
+# --- Eating / growth / speed / zoom (feat/eating-growth) ---
+# radius = RADIUS_PER_SQRT_MASS * sqrt(mass); start mass 20 -> radius ~10
+RADIUS_PER_SQRT_MASS = 2.236
+FOOD_RADIUS = 3                 # food is drawn with this fixed radius; eating it gives +food.mass
+EAT_MASS_RATIO = 1.25           # eater needs >= ratio * prey mass
+EAT_OVERLAP = 0.4               # prey centre must be within R - r * EAT_OVERLAP
+SPEED_MASS_EXPONENT = 0.3       # speed = PLAYER_SPEED * (start_mass / mass) ** exponent
+MIN_SPEED = 0.8
+FOOD_RESPAWN_PER_TICK = 5       # food added per tick while below FOOD_COUNT
+ZOOM_VIEW_K = 20                # target zoom = ZOOM_VIEW_K / radius(total mass)
+ZOOM_MIN = 0.15
+ZOOM_MAX = 2.0
+ZOOM_SMOOTHING = 0.1            # fraction of the gap closed per update
+
+# --- Split, own-cell merging and mass ejection (feat/split-eject) ---
+# Speeds are world units per tick.
+MAX_CELLS = 16
+SPLIT_MIN_MASS = 35
+SPLIT_SPEED = 20.0
+IMPULSE_FRICTION = 0.90  # Below 1% of initial speed after 44 ticks (~0.73 s).
+MERGE_BASE_TICKS = 10 * FPS
+MERGE_TICKS_PER_MASS = 0.05 * FPS  # Delay uses the mass of each new half.
+MERGE_OVERLAP_RATIO = 0.5  # Merge within half the sum of the two radii.
+OWN_CELL_RELAX_PASSES = 16
+EJECT_MIN_MASS = 32
+EJECT_COST = 18
+EJECT_MASS = 14  # Four mass units are lost on each shot.
+EJECT_SPEED = 16.0
+EJECT_FRICTION = 0.90
+EJECT_IMMUNITY_TICKS = 8  # Only the exact source cell is temporarily excluded.
+
+# --- Bots and live leaderboard (feat/bots) ---
 BOT_COUNT = 10
 BOT_NAMES = ("Blobby", "Nom", "Cookie", "Pebble", "Mochi", "Bean",
              "Bubbles", "Pudding", "Dot", "Jelly")
-BOT_EAT_RATIO = 1.25
 BOT_VIEW_RADIUS = 500
 BOT_DECISION_TICKS = 8
 BOT_WANDER_TICKS = 120

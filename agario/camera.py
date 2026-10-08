@@ -1,5 +1,12 @@
 """View transform between world and screen. No pygame import."""
 from . import config
+from .geometry import clamp, mass_to_radius
+
+
+def target_zoom(total_mass):
+    """Zoom the camera settles at for a player of `total_mass`."""
+    radius = mass_to_radius(total_mass)
+    return clamp(config.ZOOM_VIEW_K / radius, config.ZOOM_MIN, config.ZOOM_MAX)
 
 
 class Camera:
@@ -10,9 +17,18 @@ class Camera:
         self.y = 0.0
         self.zoom = 0.5
 
-    def update(self, player):
-        """Zoom out as the player grows and centre the view on them."""
-        self.zoom = config.ZOOM_MASS_FACTOR / player.total_mass + config.ZOOM_BASE
+    def update(self, player, snap=False):
+        """Ease the zoom toward the player's target zoom and centre on them.
+
+        `snap=True` jumps straight to the target (use for the first frame).
+        """
+        if not player.cells or player.total_mass <= 0:
+            return
+        target = target_zoom(player.total_mass)
+        if snap:
+            self.zoom = target
+        else:
+            self.zoom += (target - self.zoom) * config.ZOOM_SMOOTHING
         px, py = player.center
         self.x = self.screen_width / 2 - px * self.zoom
         self.y = self.screen_height / 2 - py * self.zoom

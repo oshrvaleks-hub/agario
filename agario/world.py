@@ -4,7 +4,10 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from . import config, physics
-from .entities import Food, Player
+from .entities import EjectedMass, Food, Player
+from .mechanics import eating
+from .mechanics.eject import eject_mass, update_ejected
+from .mechanics.split import apply_impulse, resolve_own_cells, split_player
 
 
 @dataclass
@@ -17,13 +20,15 @@ class Control:
 
 
 class World:
-    def __init__(self, width=config.MAP_WIDTH, height=config.MAP_HEIGHT):
+    def __init__(self, width=config.MAP_WIDTH, height=config.MAP_HEIGHT,
+                 food_target=config.FOOD_COUNT):
         self.width = width
         self.height = height
+        self.food_target = food_target
         self.food: List[Food] = []
         self.players: List[Player] = []
         self.viruses: list = []   # reserved for the virus mechanic
-        self.ejected: list = []   # reserved for the eject-mass mechanic
+        self.ejected: List[EjectedMass] = []
         self._bot_respawn_timers = {}
         self._bot_rng = random.Random()
 
@@ -40,12 +45,28 @@ class World:
         for player, control in controls.items():
             if not player.alive:
                 continue
-            # TODO: split — handle control.split (divide cells)
-            # TODO: eject — handle control.eject (spawn into self.ejected)
+            if control.split:
+                split_player(player, control.target)
+            if control.eject:
+                eject_mass(player, control.target, self)
             for cell in player.cells:
                 physics.move_cell(cell, control.target, control.speed_factor,
                                   self.width, self.height)
                 physics.eat_food(cell, self.food)
-
+        for player in dict.fromkeys([*self.players, *controls]):
+            if player.alive:
+                for cell in player.cells:
+                    apply_impulse(cell, self.width, self.height)
+                resolve_own_cells(player)
+                for cell in player.cells:
+                    physics.keep_in_bounds(cell, self.width, self.height)
+        update_ejected(self)
+        eating.resolve_player_collisions(self)
+        self._respawn_food()
         from .ai import respawn_bots
         respawn_bots(self, self._bot_respawn_timers, self._bot_rng)
+
+    def _respawn_food(self):
+        missing = self.food_target - len(self.food)
+        if missing > 0:
+            self.spawn_food(min(missing, config.FOOD_RESPAWN_PER_TICK))

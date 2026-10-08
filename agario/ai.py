@@ -7,14 +7,6 @@ from .entities import Player, PlayerCell
 from .world import Control
 
 
-def _can_eat(eater_mass, prey_mass):
-    rule = getattr(physics, "can_eat", None)
-    if rule is not None:
-        return rule(eater_mass, prey_mass)
-    # TODO: replace fallback with physics.can_eat once the shared rule lands.
-    return eater_mass >= config.BOT_EAT_RATIO * prey_mass
-
-
 class BotBrain:
     """One brain per player; expensive perception runs once every few ticks."""
 
@@ -56,9 +48,9 @@ class BotBrain:
                 for own in visible:
                     dx, dy = own.x - cell.x, own.y - cell.y
                     dist2 = dx * dx + dy * dy
-                    if _can_eat(cell.mass, own.mass):
+                    if physics.can_eat(cell.mass, own.mass):
                         threats.append((dx, dy, dist2))
-                    if _can_eat(own.mass, cell.mass):
+                    if physics.can_eat(own.mass, cell.mass):
                         prey.append((dist2, cell))
         if threats:
             # Unit escape vectors weighted by inverse distance.

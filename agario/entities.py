@@ -1,7 +1,7 @@
 """Plain game data. No pygame import."""
 import random
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from . import config
 from .geometry import mass_to_radius
@@ -28,6 +28,25 @@ class PlayerCell:
     x: float
     y: float
     mass: float = config.PLAYER_START_MASS
+    vx: float = 0.0
+    vy: float = 0.0
+    merge_timer: float = 0.0
+
+    @property
+    def radius(self):
+        return mass_to_radius(self.mass)
+
+
+@dataclass
+class EjectedMass:
+    x: float
+    y: float
+    mass: float
+    color: tuple
+    vx: float
+    vy: float
+    source: Optional[PlayerCell] = field(default=None, repr=False, compare=False)
+    immunity_ticks: int = 0
 
     @property
     def radius(self):
