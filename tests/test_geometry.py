@@ -20,4 +20,6 @@ def test_clamp():
 
 
 def test_mass_to_radius():
-    assert mass_to_radius(20) == 10
+    assert mass_to_radius(20) == pytest.approx(10, abs=0.05)
+    assert mass_to_radius(80) == pytest.approx(2 * mass_to_radius(20))  # radius ~ sqrt(mass)
+    assert mass_to_radius(0) == 0

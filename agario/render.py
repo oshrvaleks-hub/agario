@@ -48,7 +48,7 @@ class Renderer:
         for f in world.food:
             center = camera.world_to_screen((f.x, f.y))
             pygame.draw.circle(self.surface, f.color,
-                               (int(center[0]), int(center[1])), int(f.mass * zoom))
+                               (int(center[0]), int(center[1])), max(2, int(config.FOOD_RADIUS * zoom)))
 
     def draw_ejected(self, world, camera):
         for shot in world.ejected:
