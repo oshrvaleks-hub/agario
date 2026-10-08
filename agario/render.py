@@ -1,4 +1,6 @@
 """All pygame drawing."""
+import math
+
 import pygame
 
 from . import config
@@ -26,8 +28,14 @@ class Renderer:
         self.draw_grid(world, camera)
         self.draw_food(world, camera)
         self.draw_ejected(world, camera)
-        for player in world.players:
-            self.draw_player(player, camera)
+        objects = [(cell.mass, player, cell)
+                   for player in world.players for cell in player.cells]
+        objects.extend((virus.mass, None, virus) for virus in world.viruses)
+        for _, player, entity in sorted(objects, key=lambda item: item[0]):
+            if player is None:
+                self.draw_virus(entity, camera)
+            else:
+                self.draw_player(player, camera, cells=[entity])
         self.draw_hud(world, local_player)
 
     def draw_text(self, message, pos, color=config.HUD_TEXT_COLOR):
@@ -58,9 +66,22 @@ class Renderer:
             pygame.draw.circle(self.surface, shot.color, (int(sx), int(sy)),
                                max(1, int(shot.radius * camera.zoom)))
 
-    def draw_player(self, player, camera):
+    def draw_virus(self, virus, camera):
+        sx, sy = camera.world_to_screen((virus.x, virus.y))
+        radius = virus.radius * camera.zoom
+        points = []
+        for i in range(config.VIRUS_SPIKES * 2):
+            angle = math.pi * i / config.VIRUS_SPIKES
+            r = radius * (1.0 if i % 2 == 0 else 0.86)
+            points.append((int(sx + math.cos(angle) * r),
+                           int(sy + math.sin(angle) * r)))
+        pygame.draw.polygon(self.surface, config.VIRUS_COLOR, points)
+        pygame.draw.polygon(self.surface, config.VIRUS_OUTLINE_COLOR, points,
+                            max(1, int(2 * camera.zoom)))
+
+    def draw_player(self, player, camera, cells=None):
         zoom = camera.zoom
-        for cell in player.cells:
+        for cell in player.cells if cells is None else cells:
             sx, sy = camera.world_to_screen((cell.x, cell.y))
             center = (int(sx), int(sy))
             r = mass_to_radius(cell.mass)

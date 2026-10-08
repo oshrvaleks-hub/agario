@@ -2,6 +2,7 @@
 from .. import config
 from ..entities import EjectedMass
 from ..geometry import clamp, distance, normalize
+from .virus import feed_virus
 
 
 def eject_mass(player, target, world):
@@ -34,6 +35,8 @@ def update_ejected(world):
         shot.y = clamp(shot.y + shot.vy, 0, world.height)
         shot.vx *= config.EJECT_FRICTION
         shot.vy *= config.EJECT_FRICTION
+        if feed_virus(world, shot):
+            continue
         eaten = False
         for player in world.players:
             if not player.alive:

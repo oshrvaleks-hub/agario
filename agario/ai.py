@@ -52,6 +52,12 @@ class BotBrain:
                         threats.append((dx, dy, dist2))
                     if physics.can_eat(own.mass, cell.mass):
                         prey.append((dist2, cell))
+        for virus in world.viruses:
+            for own in player.cells:
+                dx, dy = own.x - virus.x, own.y - virus.y
+                dist2 = dx * dx + dy * dy
+                if dist2 <= radius2 and physics.can_eat(own.mass, virus.mass):
+                    threats.append((dx, dy, dist2))
         if threats:
             # Unit escape vectors weighted by inverse distance.
             vx = sum(dx / max(d2, 1.0) for dx, dy, d2 in threats)

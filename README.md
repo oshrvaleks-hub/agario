@@ -36,13 +36,32 @@ per tick and can be eaten by any larger cell covering its centre; the exact
 source cell cannot eat it for the first eight ticks. Each shot loses four mass
 units overall. Positions stay inside the map.
 
+The map maintains at least 18 green spiked viruses of base mass 100. New ones
+spawn outside living cells' radii, with an extra virus radius and 80 units of
+clearance. Crowded maps retry spawning on later ticks. A cell with at least
+1.25 times a virus's current mass can swallow it using the normal eating
+overlap rule. It gains the virus mass and bursts into equal pieces aiming for
+mass 20 each, limited to 16 total cells. Pieces launch radially at speed 20
+and use the ordinary split merge cooldown; at the cell cap only mass and
+cooldown are added. Smaller cells pass through and can hide underneath viruses.
+
+Ejected shots feed viruses before players can eat the shots. Each hit adds
+the shot's mass; the seventh resets the parent to mass 100 and launches a new
+mass-100 virus at speed 18 along the last shot's direction. The reset is a
+gameplay rule and does not conserve projectile mass. Launched viruses use the
+same 0.9 impulse damping as cells. Virus hits and bursts resolve before
+player-vs-player eating, and population replenishment follows bot respawning.
+Large bots treat edible viruses as threats. Rendering orders cells and viruses
+by mass, allowing small cells to hide under viruses and large ones to cover them.
+
 ## Structure
 - `agar.py` — entry point (`--frames N` for headless runs)
 - `agario/config.py` — all constants (sizes, FPS, speeds, colors, fonts)
 - `agario/geometry.py` — pure math: distance, normalize, clamp, `mass_to_radius`
-- `agario/entities.py` — data classes: `Food`, `PlayerCell`, `EjectedMass`, `Player`
+- `agario/entities.py` — data classes: `Food`, `PlayerCell`, `EjectedMass`, `Virus`, `Player`
 - `agario/mechanics/split.py` — split impulses, cooldowns, own-cell collisions and merging
 - `agario/mechanics/eject.py` — mass ejection, projectile movement and consumption
+- `agario/mechanics/virus.py` — safe spawning, virus feeding and radial cell bursts
 - `agario/world.py` — `World` state, `Control` input, `World.update(controls)`
 - `agario/physics.py` — movement, eating, map bounds
 - `agario/camera.py` — zoom and world/screen coordinate transforms
