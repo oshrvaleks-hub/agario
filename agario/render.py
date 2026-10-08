@@ -15,6 +15,7 @@ class Renderer:
         except (FileNotFoundError, OSError):
             self.font = pygame.font.SysFont(config.FONT_FALLBACK_NAME, config.FONT_SIZE, True)
             self.big_font = pygame.font.SysFont(config.FONT_FALLBACK_NAME, config.BIG_FONT_SIZE, True)
+        self.small_font = pygame.font.Font(None, config.FPS_FONT_SIZE)
         self.scoreboard_surface = pygame.Surface((95, 25), pygame.SRCALPHA)
         self.leaderboard_surface = pygame.Surface((155, 278), pygame.SRCALPHA)
         self.scoreboard_surface.fill(config.HUD_PANEL_COLOR)
@@ -71,7 +72,7 @@ class Renderer:
 
     def draw_hud(self, world, local_player):
         sw, sh = config.SCREEN_WIDTH, config.SCREEN_HEIGHT
-        score = "Score: " + str(int(local_player.total_mass * 2))
+        score = "Score: " + str(int(local_player.total_mass))
         w, h = self.font.size(score + " ")
         self.surface.blit(pygame.transform.scale(self.scoreboard_surface, (w, h)), (8, sh - 30))
         self.draw_text(score, (10, sh - 30))
@@ -87,3 +88,30 @@ class Renderer:
                      else config.HUD_TEXT_COLOR)
             self.draw_text("{}. {}".format(rank, player.name),
                            (sw - 157, 20 + 25 * line), color)
+
+    def draw_fps(self, fps):
+        text = self.small_font.render("FPS: {:.0f}".format(fps), True,
+                                      config.PLAYER_NAME_COLOR)
+        self.surface.blit(text, (8, 8))
+
+    def draw_death(self, stats):
+        overlay = pygame.Surface(self.surface.get_size(), pygame.SRCALPHA)
+        overlay.fill(config.DEATH_OVERLAY_COLOR)
+        self.surface.blit(overlay, (0, 0))
+        lines = [
+            "You were eaten!",
+            "Final score: {:.0f}".format(stats.max_mass),
+            "Food eaten: {}".format(stats.food_eaten),
+            "Players eaten: {}".format(stats.players_eaten),
+            "Time alive: {:.1f}s".format(stats.ticks_alive / config.FPS),
+            "Best rank: {}".format(stats.best_rank if stats.best_rank is not None else "-"),
+            "Press Enter / Space to play again",
+            "or click to restart",
+        ]
+        width, height = self.surface.get_size()
+        top = (height - len(lines) * config.DEATH_LINE_HEIGHT) // 2
+        for i, line in enumerate(lines):
+            font = self.big_font if i == 0 else self.font
+            text = font.render(line, True, config.HUD_TEXT_COLOR)
+            self.surface.blit(text, ((width - text.get_width()) // 2,
+                                     top + i * config.DEATH_LINE_HEIGHT))

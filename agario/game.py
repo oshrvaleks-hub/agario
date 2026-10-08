@@ -7,6 +7,7 @@ from .camera import Camera
 from .entities import Player
 from .geometry import distance
 from .render import Renderer
+from .session import GameSession, GameState
 from .world import Control, World
 
 
@@ -29,6 +30,7 @@ def run(max_frames=None):
     camera = Camera()
     world, player = build_world()
     camera.update(player, snap=True)
+    session = GameSession(world, player)
     brains = {bot: BotBrain() for bot in world.players if bot.is_bot}
 
     frames = 0
@@ -43,10 +45,16 @@ def run(max_frames=None):
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
                     running = False
+                elif session.state is GameState.DEAD and e.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    if session.restart():
+                        camera.update(player, snap=True)
                 elif e.key == pygame.K_SPACE:
                     split = True
                 elif e.key == pygame.K_w:
                     eject = True
+            elif e.type == pygame.MOUSEBUTTONDOWN and session.state is GameState.DEAD:
+                if session.restart():
+                    camera.update(player, snap=True)
 
         mouse = pygame.mouse.get_pos()
         centre = (config.SCREEN_WIDTH / 2, config.SCREEN_HEIGHT / 2)
@@ -56,10 +64,16 @@ def run(max_frames=None):
 
         controls = {bot: brain.decide(bot, world) for bot, brain in brains.items()
                     if bot.alive and bot.cells}
-        controls[player] = control
+        if session.state is GameState.PLAYING:
+            controls[player] = control
         world.update(controls)
-        camera.update(player)
+        session.update()
+        if session.state is GameState.PLAYING:
+            camera.update(player)
         renderer.draw(world, camera, player)
+        renderer.draw_fps(clock.get_fps())
+        if session.state is GameState.DEAD:
+            renderer.draw_death(session.stats)
         pygame.display.flip()
         frames += 1
 

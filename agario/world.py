@@ -31,6 +31,10 @@ class World:
         self.ejected: List[EjectedMass] = []
         self._bot_respawn_timers = {}
         self._bot_rng = random.Random()
+        # Cumulative exact consumption counts; session statistics take baselines.
+        self.food_eaten = {}
+        self.players_eaten = {}
+        self.tick_peak_mass = {}
 
     def spawn_food(self, count):
         self.food.extend(Food.random(self.width, self.height) for _ in range(count))
@@ -42,6 +46,7 @@ class World:
         return spawn_bots(self, n, names, self._bot_rng)
 
     def update(self, controls: Dict[Player, Control]):
+        self.tick_peak_mass = {p: p.total_mass for p in self.players if p.alive}
         for player, control in controls.items():
             if not player.alive:
                 continue
@@ -52,7 +57,10 @@ class World:
             for cell in player.cells:
                 physics.move_cell(cell, control.target, control.speed_factor,
                                   self.width, self.height)
-                physics.eat_food(cell, self.food)
+                eaten = physics.eat_food(cell, self.food)
+                self.food_eaten[player] = self.food_eaten.get(player, 0) + eaten
+            self.tick_peak_mass[player] = max(self.tick_peak_mass.get(player, 0),
+                                              player.total_mass)
         for player in dict.fromkeys([*self.players, *controls]):
             if player.alive:
                 for cell in player.cells:
@@ -61,7 +69,13 @@ class World:
                 for cell in player.cells:
                     physics.keep_in_bounds(cell, self.width, self.height)
         update_ejected(self)
-        eating.resolve_player_collisions(self)
+        for player in self.players:
+            if player.alive:
+                self.tick_peak_mass[player] = max(self.tick_peak_mass.get(player, 0),
+                                                  player.total_mass)
+        kills = eating.resolve_player_collisions(self)
+        for player, count in kills.items():
+            self.players_eaten[player] = self.players_eaten.get(player, 0) + count
         self._respawn_food()
         from .ai import respawn_bots
         respawn_bots(self, self._bot_respawn_timers, self._bot_rng)
